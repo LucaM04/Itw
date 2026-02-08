@@ -17,23 +17,23 @@ from cc_learn import train_dqn_curriculum, run_training_loop, train_ppo_curricul
 from cc_learn_advanced import train_dueling_dqn_curriculum, train_recurrent_ppo_curriculum, DuelingDQN
 
 if __name__ == "__main__":
-    # 1. Trainieren (oder auskommentieren, wenn schon trainiert)
+    # Trainieren (oder auskommentieren, wenn schon trainiert)
     #train_dqn()
     #train_ppo()
     #train_ppo_curriculum()
     #train_dqn_curriculum()
-    train_recurrent_ppo_curriculum()
+    #train_recurrent_ppo_curriculum()
     #train_dueling_dqn_curriculum()
 
 
-    # 2. Turnier Vorbereitung
+    # Turnier Vorbereitung
     print("\n Bereite das große Turnier vor...")
     device = torch.device("cpu") #turnier läuft auf CPU schneller als auf GPU, da Datentransport kleiner
     
     # Gegner laden
-    players = [s() for s in ax.demo_strategies]
+    #players = [s() for s in ax.demo_strategies]
     #players = [s() for s in ax.strategies]
-    #players = [s() for s in ax.axelrod_first_strategies]
+    players = [s() for s in ax.axelrod_first_strategies]
     
 
     # PPO Laden & Hinzufügen
@@ -72,12 +72,12 @@ if __name__ == "__main__":
     except Exception as e:
         print(f" DQN Fehler: {e}")
 
-    # 3. Turnier Start
+    # Turnier Start
     print(f" Starte Kämpfe zwischen {len(players)} Strategien...")
     tournament = ax.Tournament(players, turns=200, repetitions=5)
     results = tournament.play(processes=1, progress_bar=True)
 
-    # 4. Auswertung
+    # Auswertung
     print("\n" + "="*30)
     print("       LEADERBOARD       ")
     print("="*30)

@@ -57,7 +57,7 @@ class DuelingDQN(nn.Module):
     
 def train_dueling_dqn_curriculum():
     
-    print("\n PHASE 1: Schule (Lerne Kooperation gegen TitForTat)")
+    print("\n PHASE 1: (Lerne Kooperation gegen TitForTat)")
     
     
     env_school = AXLPrisonersDilemmaEnv(opponent_name="Tit For Tat", random_opponent=False, max_rounds=200)
@@ -78,7 +78,7 @@ def train_dueling_dqn_curriculum():
         target_net=target_net, 
         optimizer=optimizer, 
         memory=memory, 
-        episodes=3000,       #  Phase 1
+        episodes=3000,       
         epsilon_start=1.0,   
         epsilon_end=0.05, 
         gamma=0.995          
@@ -88,7 +88,7 @@ def train_dueling_dqn_curriculum():
     torch.save(policy_net.state_dict(), "dqn_school_dueling.pth") # Zwischenspeichern
 
     
-    print("\n PHASE 2: Universität (Gemischte Gegner)")
+    print("\n PHASE 2: Gemischte Gegner")
     
     
     env_uni = AXLPrisonersDilemmaEnv(random_opponent=True, max_rounds=200)
@@ -103,7 +103,7 @@ def train_dueling_dqn_curriculum():
         policy_net=policy_net, 
         target_net=target_net, 
         optimizer=optimizer, 
-        memory=memory,       # Alter Speicher hilft gegen Vergessen
+        memory=memory,       # Alter Speicher
         episodes=5000,       # Länger trainieren für die komplexeren Gegner
         epsilon_start=0.2,   # Nicht bei 1.0 starten
         epsilon_end=0.01,    # Ganz runter gehen
@@ -125,7 +125,7 @@ def train_recurrent_ppo_curriculum():
         "MlpLstmPolicy", 
         env_school, 
         learning_rate=0.0003, 
-        ent_coef=0.02, 
+        ent_coef=0.04, 
         gamma=0.996,
         n_steps=2048,
         batch_size=128,
@@ -133,21 +133,39 @@ def train_recurrent_ppo_curriculum():
         tensorboard_log="./ppo_tensorboard/", 
         device="cpu")
     
-    model.learn(total_timesteps=100000, tb_log_name="PPO_Curriculum_Phase1")
+    model.learn(total_timesteps=150000, tb_log_name="PPO_Curriculum_Phase1")
     model.save("ppo_school_rec")
-    print("✅ PPO Phase 1 abgeschlossen.")
+    print(" PPO Phase 1 abgeschlossen.")
 
+    print("\n PHASE 2: TFT und Defector")
+
+    env_contrast = AXLPrisonersDilemmaEnv(random_opponent=True, max_rounds=200)
     
+    # Wir manipulieren die Gegner-Liste manuell:
+    env_contrast.learning_pool = [ax.TitForTat, ax.TitForTat, ax.Defector]
     
-    print("\n PHASE 2: PPO Universität (Harte Realität)")
+    model = RecurrentPPO.load("ppo_school_rec", env=env_contrast)
+    
+    # Lernrate etwas senken
+    new_lr = 0.0001
+    model.learning_rate = new_lr
+    for param_group in model.policy.optimizer.param_groups:
+        param_group['lr'] = new_lr
+        
+    # Hier lange trainieren, bis er das Umschalten kapiert
+    model.learn(total_timesteps=300000, tb_log_name="PPO_Curriculum_Phase2")
+    model.save("ppo_agent_smart")
+    print(" Phase 2 fertig")
+    
+    print("\n PHASE 3: Gemischte Gegner")
     
     
     env_uni = AXLPrisonersDilemmaEnv(random_opponent=True, max_rounds=200)
     
-    model = RecurrentPPO.load("ppo_school_rec", env=env_uni)
+    model = RecurrentPPO.load("ppo_agent_smart", env=env_uni)
     
     
-    new_lr = 0.0001
+    new_lr = 0.00005
     model.learning_rate = new_lr
     for param_group in model.policy.optimizer.param_groups:
         param_group['lr'] = new_lr
@@ -155,7 +173,7 @@ def train_recurrent_ppo_curriculum():
     print(f"  Lernrate auf {new_lr} gesenkt.")
     
     # 6. Weiterlernen
-    model.learn(total_timesteps=600000, tb_log_name="PPO_Curriculum_Phase2")
+    model.learn(total_timesteps=200000, tb_log_name="PPO_Curriculum_Phase3")
     model.save("ppo_agent")
     print(" PPO Training komplett beendet.")
     

@@ -9,12 +9,12 @@ import random
 from collections import deque
 from stable_baselines3 import PPO
 
-# --- KONFIGURATION ---
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# --- KONFIGURATION (Nur hier ändern!) ---
+
 HISTORY_LENGTH = 10  # 10 Züge * 2 Spieler = 20 Inputs
-RL_TO_AX = {0: ax.Action.C, 1: ax.Action.D}
+RL_TO_AX = {0: ax.Action.C, 1: ax.Action.D} #Uebersetzung zwischen Training und Axelrod Turnier
 AX_TO_RL = {'C': 0, 'D': 1}
 
 class AXLPrisonersDilemmaEnv(gym.Env):
@@ -40,7 +40,7 @@ class AXLPrisonersDilemmaEnv(gym.Env):
                 ax.WinStayLoseShift, # Verhalten je nach Erfolg anpassen
                 ax.Grumpy            # Gut sein lohnt sich
             ]
-            # Wir überschreiben die riesige Liste
+            # nur definierte Gegner verwenden
             self.all_strategies = self.learning_pool
         
         self.opponent_class = ax.TitForTat
@@ -104,14 +104,14 @@ class AXLPrisonersDilemmaEnv(gym.Env):
         my_hist = [AX_TO_RL[str(m)] for m in self.mock_opponent.history]
         opp_hist = [AX_TO_RL[str(m)] for m in self.opponent.history]
         
-        # PADDING (Auffüllen, falls zu kurz)
+        # Padding falls noch nicht genug Runden gespielt wurden
         if len(my_hist) < HISTORY_LENGTH:
             needed = HISTORY_LENGTH - len(my_hist)
-            padding = [0] * needed
+            padding = [0] * needed  #beide haben Kooperiert
             my_hist = padding + my_hist
             opp_hist = padding + opp_hist
             
-        # CUTTING nur 10 steps speichern
+        # Nur die letzten 10 Runden sind für die beiden Spieler sichtbar
         my_hist = my_hist[-HISTORY_LENGTH:]
         opp_hist = opp_hist[-HISTORY_LENGTH:]
         

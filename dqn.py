@@ -292,7 +292,7 @@ class SB3Player(ax.Player):
         self.model = model
 
     def strategy(self, opponent):
-        # Exakt die gleiche Logik wie beim DQN Player
+        # gleiche Logik wie beim DQN Player
         my_hist = [AX_TO_RL[str(m)] for m in self.history]
         opp_hist = [AX_TO_RL[str(m)] for m in opponent.history]
         
@@ -310,13 +310,13 @@ class SB3Player(ax.Player):
         action=action.item()
         return RL_TO_AX[int(action)]
     
-class SB3RecurrentPlayer(ax.Player):
+class SB3RecurrentPlayer(ax.Player):    #Recurrent PPO Player für Axelrod Turnier
     name = "Mein Smart LSTM"
 
     def __init__(self, model):
         super().__init__()
         self.model = model
-        # Speicher für das LSTM-Gedächtnis
+        # Speicher für das LSTM
         self.lstm_states = None
         # Flag: Ist das der Start eines Spiels?
         self.episode_start = True
@@ -324,12 +324,12 @@ class SB3RecurrentPlayer(ax.Player):
     def reset(self):
         """Wird von axelrod automatisch vor jedem neuen Match aufgerufen."""
         super().reset()
-        # WICHTIG: Gedächtnis löschen, damit er Strategien nicht vermischt!
+        # Gedächtnis löschen, damit neuer Gegner erkannt werden kann
         self.lstm_states = None
         self.episode_start = True
 
-    def strategy(self, opponent):
-        # 1. Observation bauen (Wie gehabt)
+    def strategy(self, opponent):   #diese Funktion muss jeder Speiler in Axelrod besitzen
+        # wie im Environment
         my_hist = [AX_TO_RL[str(m)] for m in self.history]
         opp_hist = [AX_TO_RL[str(m)] for m in opponent.history]
         
@@ -343,12 +343,10 @@ class SB3RecurrentPlayer(ax.Player):
             
         obs = np.array(my_hist + opp_hist)
         
-        # 2. Reshape für SB3 (WICHTIG!)
-        # Das Modell erwartet (Batch_Size, Input_Dim), also (1, 20)
+        # SB3 Modell erwartet (Batch_Size, Input_Dim), also (1, 20)
         obs = obs.reshape(1, -1)
 
-        # 3. Vorhersage MIT Gedächtnis
-        # Wir übergeben den alten State und bekommen den neuen State zurück
+        #Vorhersage
         action, self.lstm_states = self.model.predict(
             obs, 
             state=self.lstm_states, 
@@ -356,13 +354,13 @@ class SB3RecurrentPlayer(ax.Player):
             deterministic=True
         )
         
-        # Ab jetzt sind wir mittendrin, kein Start mehr
-        self.episode_start = False
+        
+        self.episode_start = False  #Spiel hat begonnen
         action=action.item()
         
         return RL_TO_AX[int(action)]
 
-def visualize_results(results, players):
+def visualize_results(results, players):    #Verschiedene Diagramme zur Auswertung des Turniers
     
     sns.set_theme(style="whitegrid")
     
@@ -381,7 +379,7 @@ def visualize_results(results, players):
         payoff_matrix = raw_matrix
         
     
-    plt.figure(figsize=(20, 14))
+    plt.figure(figsize=(20, 14))    #Heatmap erzeugen, die durchschnittliche Punkte jeder Paarung zeigt
     sns.heatmap(
         payoff_matrix, 
         annot=True, 
@@ -395,14 +393,12 @@ def visualize_results(results, players):
     plt.tight_layout()
     plt.show()
 
-    # ==========================================
-    # 2. BOXPLOT: Gesamtranking & Stabilität
-    # ==========================================
+    #Boxplot des Gessamtrankings
     print(" Erstelle Ranking-Boxplot...")
     
     fig, ax_plot = plt.subplots(figsize=(30, 12))
     
-    # Wir nutzen die Axelrod Plot-Funktion, die ist sehr stabil
+    # in Axelrod bib enthalten
     plot = ax.Plot(results)
     plot.boxplot(ax=ax_plot)
     
@@ -412,11 +408,8 @@ def visualize_results(results, players):
     plt.tight_layout()
     plt.show()
 
-    # ==========================================
-    # 3. DEIN AGENT IM DETAIL
-    # ==========================================
-    # Wir suchen deine Agenten
-    my_agents = [p for p in players if "Mein" in p.name or "DQN" in p.name or "PPO" in p.name]
+    # Auswertung für die trainierten Modelle anzeigen
+    my_agents = [p for p in players if "Mein" in p.name or "DQN" in p.name or "PPO" in p.name]  #Modelle suchen
     
     for agent in my_agents:
         print(f" Analyse für: {agent.name}...")
@@ -431,15 +424,14 @@ def visualize_results(results, players):
             
             plt.figure(figsize=(12, fig_height))
             
-            # TRICK 2: Tausche x und y
-            # y=names (Namen links), x=scores (Balken nach rechts)
+        
             sns.barplot(y=names, x=scores, hue=names, legend=False, palette=cols)
             
-            # Linien sind jetzt vertikal (axvline statt axhline)
+            
             plt.axvline(3.0, color='blue', linestyle='--', label="Kooperation ")
             plt.axvline(1.0, color='black', linestyle='--', label="Defect ")
             
-            plt.xlim(0, 5.5) # xlim statt ylim
+            plt.xlim(0, 5.5) 
             plt.title(f"Performance von {agent.name}")
             plt.xlabel("Durchschnittlicher Score")
             plt.ylabel("Gegner")

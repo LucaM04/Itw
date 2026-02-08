@@ -75,14 +75,14 @@ plt.scatter(x, [0]*rounds, c=colors_opp, s=100, marker='s', label="Gegner")
 
 # Beschriftung
 plt.yticks([0, 1])
-plt.ylabel(f"{real_opponent} Mein Agent")
+plt.ylabel(f"{real_opponent}    Mein Agent")
 plt.ylim(-0.5, 1.5)
 plt.title(f"Mein Agent gegen {real_opponent}")
 plt.xlabel("Runde")
 # Legende
 from matplotlib.lines import Line2D
-legend_elements = [Line2D([0], [0], marker='o', color='w', markerfacecolor='green', label='Kooperation', markersize=10),
-                   Line2D([0], [0], marker='o', color='w', markerfacecolor='red', label='Verrat', markersize=10)]
+legend_elements = [Line2D([0], [0], marker='s', color='w', markerfacecolor='green', label='Kooperation', markersize=10),
+                   Line2D([0], [0], marker='s', color='w', markerfacecolor='red', label='Verrat', markersize=10)]
 plt.legend(handles=legend_elements, loc='right')
 
 plt.tight_layout()
