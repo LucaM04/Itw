@@ -125,18 +125,19 @@ def train_recurrent_ppo_curriculum():
         "MlpLstmPolicy", 
         env_school, 
         learning_rate=0.0003, 
-        ent_coef=0.01, 
+        ent_coef=0.02, 
+        gamma=0.996,
         n_steps=2048,
         batch_size=128,
         verbose=0, 
         tensorboard_log="./ppo_tensorboard/", 
         device="cpu")
     
-    model.learn(total_timesteps=200000, tb_log_name="PPO_Curriculum_Phase1")
+    model.learn(total_timesteps=100000, tb_log_name="PPO_Curriculum_Phase1")
     model.save("ppo_school_rec")
     print("✅ PPO Phase 1 abgeschlossen.")
 
-    # ==========================================
+    
     
     print("\n PHASE 2: PPO Universität (Harte Realität)")
     

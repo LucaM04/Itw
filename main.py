@@ -22,22 +22,22 @@ if __name__ == "__main__":
     #train_ppo()
     #train_ppo_curriculum()
     #train_dqn_curriculum()
-    #train_recurrent_ppo_curriculum()
+    train_recurrent_ppo_curriculum()
     #train_dueling_dqn_curriculum()
 
 
     # 2. Turnier Vorbereitung
-    print("\n🏆 Bereite das große Turnier vor...")
+    print("\n Bereite das große Turnier vor...")
     device = torch.device("cpu") #turnier läuft auf CPU schneller als auf GPU, da Datentransport kleiner
     
     # Gegner laden
-    #players = [s() for s in ax.demo_strategies]
+    players = [s() for s in ax.demo_strategies]
     #players = [s() for s in ax.strategies]
-    players = [s() for s in ax.axelrod_first_strategies]
+    #players = [s() for s in ax.axelrod_first_strategies]
     
 
     # PPO Laden & Hinzufügen
-    print("🔄 Lade PPO Modell...")
+    print(" Lade PPO Modell...")
     try:
         
         ppo_model = RecurrentPPO.load("ppo_agent", device="cpu") 
