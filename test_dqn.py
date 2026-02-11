@@ -12,22 +12,25 @@ my_scores = []
 opp_scores = []
 rounds = 50
 
-opponent_name = "Tit For Tat" 
-#opponent_name = "Defector"
+#opponent_name = "Tit For Tat" 
+opponent_name = "Defector"
 #opponent_name = "Cooperator"
+#opponent_name = "First by Stein and Rapoport"
+#opponent_name = "First by Tideman and Chieruzzi"
+
+
 # Environment erstellen
 env = AXLPrisonersDilemmaEnv(opponent_name=opponent_name, random_opponent=False, max_rounds=100)
 
 print("Lade DQN Modell...")
 
 # Leeres Netz erstellen
-#model = DQN(20, 2).to(device)
-model = DuelingDQN(20, 2).to(device)
+model = DQN(20, 2).to(device)
+#model = DuelingDQN(20, 2).to("cpu")
 
 try:
     # Gewichte laden
-    model.load_state_dict(torch.load("dqn_agent.pth"))
-    # In den Eval-Modus schalten, keine Anpassung moeglich
+    model.load_state_dict(torch.load("dqn_agent_cc1.pth", map_location=torch.device('cpu'), weights_only=True))    # In den Eval-Modus schalten, keine Anpassung moeglich
     model.eval()
     print("Modell erfolgreich geladen.")
 except Exception as e:

@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from environment import AXLPrisonersDilemmaEnv, device, RL_TO_AX, AX_TO_RL, HISTORY_LENGTH
 
-
+##Variante 1  mit selbstgebautem DQN
 class DQN(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(DQN, self).__init__()
@@ -39,6 +39,7 @@ class ReplayBuffer: #speichert zustand, aktion, reward, nächsten Zustand für d
     def __len__(self):
         return len(self.buffer)
 
+##training Variante 1
 def train_dqn():
     print("\n START: DQN Training...")
     # Hyperparameter 
@@ -192,7 +193,8 @@ def run_training_loop(env, policy_net, target_net, optimizer, memory, episodes, 
         epsilon = max(epsilon_end, epsilon * epsilon_decay)
     writer.close()
 
-def train_ppo():
+##Version 2 normales training
+def train_ppo():    
     print("\n START: PPO Training...")
     env = AXLPrisonersDilemmaEnv(random_opponent=True, max_rounds=200)
     model = PPO("MlpPolicy", env, gamma=0.99, ent_coef=0.05, learning_rate=0.001, verbose=0) # verbose=0 für weniger Spam
@@ -201,6 +203,7 @@ def train_ppo():
     model.save("ppo_agent") # Speichert als ppo_agent.zip
     return model
 
+##Version 2 curriculum  training unnötig nach cc_learn
 def train_ppo_curriculum1():    #erste Version des Curriculum learning
     env_start = AXLPrisonersDilemmaEnv(opponent_name="Tit For Tat", random_opponent=False) #nur gegen TitForTat trainieren
     model = PPO("MlpPolicy", env_start, learning_rate=0.001)
@@ -213,7 +216,7 @@ def train_ppo_curriculum1():    #erste Version des Curriculum learning
     model.learn(total_timesteps=200000)
     model.save("ppo_agent")
 
-#Spieler erzeugen, der im Axelrod Turnier spielen kann
+##Version 1 Spieler 
 class DQNPlayer(ax.Player):
     name = "Mein Smart DQN"
     
@@ -249,6 +252,8 @@ class DQNPlayer(ax.Player):
 
         return RL_TO_AX[int(action_index)]
     
+
+##Version 3 Spieler
 class DuelingDQNPlayer(ax.Player):
     name = "Mein Dueling DQN"
     
@@ -284,6 +289,8 @@ class DuelingDQNPlayer(ax.Player):
 
         return RL_TO_AX[int(action_index)]
 
+
+##Version 2 Spieler 
 class SB3Player(ax.Player):
     name = "Mein Smart PPO"
 
@@ -310,6 +317,7 @@ class SB3Player(ax.Player):
         action=action.item()
         return RL_TO_AX[int(action)]
     
+## Version 4 Spieler
 class SB3RecurrentPlayer(ax.Player):    #Recurrent PPO Player für Axelrod Turnier
     name = "Mein Smart LSTM"
 
@@ -444,7 +452,7 @@ def visualize_results(results, players):    #Verschiedene Diagramme zur Auswertu
     plot = ax.Plot(results) #Evolutionssimulation aus der Axelrod bib
     eco = ax.Ecosystem(results)
 
-    eco.reproduce(100) 
+    eco.reproduce(10000) 
 
     fig, ax_obj = plt.subplots(figsize=(12, 8))
     plot.stackplot(eco, ax=ax_obj)  
@@ -453,6 +461,73 @@ def visualize_results(results, players):    #Verschiedene Diagramme zur Auswertu
     plt.xlabel("Generationen")
     plt.ylabel("Marktanteil der Strategie")
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    plt.tight_layout()
+    plt.show()
+
+    # ==========================================
+    # NEU: Grafische Ranking-Tabelle erstellen
+    # ==========================================
+    print(" Erstelle Ranking-Tabelle...")
+    
+    # 1. Daten für die Tabelle vorbereiten
+    original_names = [str(p) for p in players]
+    table_data = []
+    
+    for rank, name in enumerate(results.ranked_names):
+        idx = original_names.index(name)
+        
+        # Durchschnittlichen Score pro Zug berechnen (aus allen Repetitionen)
+        avg_score = np.mean(results.normalised_scores[idx])
+        
+        # Deine Agenten markieren
+        is_my_agent = "PPO" in name or "DQN" in name or "Mein" in name
+        marker = "⭐ " if is_my_agent else ""
+        
+        table_data.append([
+            rank + 1, 
+            f"{marker}{name}", 
+            f"{avg_score:.3f}"
+        ])
+        
+    # 2. Plot für die Tabelle aufbauen
+    # Höhe dynamisch anpassen basierend auf der Anzahl der Spieler
+    fig_height = max(4, len(table_data) * 0.3 + 1)
+    fig_table, ax_table = plt.subplots(figsize=(10, fig_height))
+    
+    # Achsen verstecken, wir wollen nur die Tabelle sehen
+    ax_table.axis('tight')
+    ax_table.axis('off')
+    
+    columns = ["Platz", "Strategie", "Ø Punkte pro Zug"]
+    
+    # Tabelle zeichnen
+    table = ax_table.table(
+        cellText=table_data, 
+        colLabels=columns, 
+        loc='center', 
+        cellLoc='center'
+    )
+    
+    # 3. Styling der Tabelle (Schriftgröße, Farben)
+    table.auto_set_font_size(False)
+    table.set_fontsize(12)
+    table.scale(1.2, 1.8) # (Spaltenbreite, Zeilenhöhe)
+    
+    # Farben anpassen (Header dunkel, deine KIs farblich hervorgehoben)
+    for (row, col), cell in table.get_celld().items():
+        if row == 0:
+            # Header-Zeile
+            cell.set_text_props(weight='bold', color='white')
+            cell.set_facecolor('#4C72B0') # Schönes Seaborn-Blau
+        else:
+            # Zeilen deiner Agenten leicht einfärben, damit sie sofort auffallen
+            cell_text = table_data[row-1][1]
+            if "⭐" in cell_text:
+                cell.set_facecolor('#e6f2ff') # Helles Blau für deine KIs
+                if col == 1: # Den Namen fett machen
+                    cell.set_text_props(weight='bold')
+
+    plt.title("🏆 Finales Turnier-Ranking", fontsize=16, pad=20, weight='bold')
     plt.tight_layout()
     plt.show()
 

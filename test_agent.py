@@ -13,7 +13,7 @@ my_moves = []
 opp_moves = []
 my_scores = []
 opp_scores = []
-rounds = 50
+rounds = 200
 
 opponent_name = "Tit For Tat"
 #opponent_name = "Defector"

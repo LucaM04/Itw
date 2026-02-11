@@ -34,7 +34,7 @@ if __name__ == "__main__":
     #players = [s() for s in ax.demo_strategies]
     #players = [s() for s in ax.strategies]
     players = [s() for s in ax.axelrod_first_strategies]
-    
+    ##players.append(ax.Cooperator())
 
     # PPO Laden & Hinzufügen
     print(" Lade PPO Modell...")
