@@ -2,9 +2,7 @@ import axelrod as ax
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-# ==========================================
 # 1. SETUP & SPIELER
-# ==========================================
 rounds = 50
 my_moves = []
 opp_moves = []
@@ -19,16 +17,13 @@ player2 = ax.FirstByTidemanAndChieruzzi()
 
 print(f"\n--- Duell: {player1.name} vs {player2.name} ---")
 
-# ==========================================
 # 2. MATCH STARTEN
-# ==========================================
 # Das Match wird erstellt und direkt gespielt
 match = ax.Match([player1, player2], turns=rounds)
 results = match.play() 
 
-# ==========================================
+
 # 3. DATEN AUFBEREITEN (Die fehlende Schleife)
-# ==========================================
 # Übersetzungstabelle: 'C' wird zu 0, 'D' wird zu 1
 move_map = {'C': 0, 'D': 1}
 # Punkteverteilung (Ich, Gegner) -> (Meine Pkt, Seine Pkt)

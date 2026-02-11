@@ -464,9 +464,7 @@ def visualize_results(results, players):    #Verschiedene Diagramme zur Auswertu
     plt.tight_layout()
     plt.show()
 
-    # ==========================================
-    # NEU: Grafische Ranking-Tabelle erstellen
-    # ==========================================
+
     print(" Erstelle Ranking-Tabelle...")
     
     # 1. Daten für die Tabelle vorbereiten
