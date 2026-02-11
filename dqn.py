@@ -467,7 +467,7 @@ def visualize_results(results, players):    #Verschiedene Diagramme zur Auswertu
 
     print(" Erstelle Ranking-Tabelle...")
     
-    # 1. Daten sammeln und MANUELL sortieren
+    # 1. Daten sammeln 
     original_names = [str(p) for p in players]
     score_data = []
     
@@ -477,7 +477,6 @@ def visualize_results(results, players):    #Verschiedene Diagramme zur Auswertu
         clean_name = players[idx].name
         score_data.append((clean_name, total_score))
         
-    # HIER IST DER FIX: Wir sortieren die Liste mathematisch absteigend nach Punkten!
     score_data.sort(key=lambda x: x[1], reverse=True)
     
     # 2. Tabelle vorbereiten
@@ -485,14 +484,14 @@ def visualize_results(results, players):    #Verschiedene Diagramme zur Auswertu
     
     for rank, (clean_name, total_score) in enumerate(score_data):
         
-        # Ränge formatieren (ohne Emojis wegen Windows-Font-Problemen)
+        # Ränge formatieren 
         rank_str = f"{rank + 1}."
         
-        # Deine Agenten erkennen
+        # Agenten erkennen
         is_my_agent = "Mein" in clean_name or "DQN" in clean_name or "PPO" in clean_name or "LSTM" in clean_name
         marker = "► " if is_my_agent else ""
         
-        # Tausendertrennzeichen hinzufügen (z.B. 12.345)
+        # Tausendertrennzeichen hinzufügen
         formatted_score = f"{total_score:,}".replace(',', '.')
         
         table_data.append([
@@ -519,7 +518,7 @@ def visualize_results(results, players):    #Verschiedene Diagramme zur Auswertu
         cellLoc='center'
     )
     
-    # 4. Styling der Tabelle (Premium Optik)
+    # 4. Styling der Tabelle 
     table.auto_set_font_size(False)
     table.set_fontsize(12)
     table.scale(1.2, 2.0) 
@@ -532,17 +531,17 @@ def visualize_results(results, players):    #Verschiedene Diagramme zur Auswertu
         cell.set_edgecolor('#dddddd') 
         
         if row == 0:
-            # Header-Zeile: Edles, dunkles Blau-Grau
+            # Header-Zeile
             cell.set_text_props(weight='bold', color='white', fontsize=13)
             cell.set_facecolor('#2c3e50') 
         else:
-            # Abwechselnde Zeilenfarben (Zebra-Muster)
+            # Abwechselnde Zeilenfarben 
             if row % 2 == 0:
                 cell.set_facecolor('#f8f9fa')
             else:
                 cell.set_facecolor('#ffffff')
                 
-            # Deine Agenten extrem edel hervorheben
+            # Agenten hervorheben
             cell_text = table_data[row-1][1]
             if "►" in cell_text:
                 cell.set_facecolor('#d4edda') 
