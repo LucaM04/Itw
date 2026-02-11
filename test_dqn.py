@@ -13,8 +13,8 @@ opp_scores = []
 rounds = 50
 
 #opponent_name = "Tit For Tat" 
-opponent_name = "Defector"
-#opponent_name = "Cooperator"
+#opponent_name = "Defector"
+opponent_name = "Cooperator"
 #opponent_name = "First by Stein and Rapoport"
 #opponent_name = "First by Tideman and Chieruzzi"
 

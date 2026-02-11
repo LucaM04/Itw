@@ -13,10 +13,11 @@ my_moves = []
 opp_moves = []
 my_scores = []
 opp_scores = []
-rounds = 200
+rounds = 50
 
-opponent_name = "Tit For Tat"
+#opponent_name = "Tit For Tat"
 #opponent_name = "Defector"
+opponent_name = "First by Stein and Rapoport"
 
 
 # Environment erstellen
