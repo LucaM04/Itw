@@ -15,6 +15,8 @@ from environment import AXLPrisonersDilemmaEnv, device, RL_TO_AX, AX_TO_RL, HIST
 from dqn import DQN, ReplayBuffer, run_training_loop
 import tensorboard
 
+
+##Curriculum training für Version 1
 def train_dqn_curriculum():
     
     print("\n PHASE 1: Schule (Lerne Kooperation gegen TitForTat)")
@@ -73,7 +75,7 @@ def train_dqn_curriculum():
     torch.save(policy_net.state_dict(), "dqn_agent.pth")
     return policy_net
 
-
+##Curriculum training für Version 2
 def train_ppo_curriculum():
     print("\n PHASE 1: Lerne Kooperation")
     

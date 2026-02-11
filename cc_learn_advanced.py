@@ -17,6 +17,8 @@ from environment import AXLPrisonersDilemmaEnv, device, RL_TO_AX, AX_TO_RL, HIST
 from dqn import ReplayBuffer, run_training_loop
 import tensorboard
 
+
+##erstellen von Version 3
 class DuelingDQN(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(DuelingDQN, self).__init__()
@@ -55,6 +57,8 @@ class DuelingDQN(nn.Module):
         
         return q_vals
     
+
+##Curriculum training für Version 3
 def train_dueling_dqn_curriculum():
     
     print("\n PHASE 1: (Lerne Kooperation gegen TitForTat)")
@@ -114,6 +118,7 @@ def train_dueling_dqn_curriculum():
     torch.save(policy_net.state_dict(), "dqn_agent.pth")
     return policy_net
 
+##Curriculum training für Version 4
 def train_recurrent_ppo_curriculum():
     print("\n PHASE 1: Lerne Kooperation")
     
