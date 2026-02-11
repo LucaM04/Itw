@@ -467,36 +467,49 @@ def visualize_results(results, players):    #Verschiedene Diagramme zur Auswertu
 
     print(" Erstelle Ranking-Tabelle...")
     
-    # 1. Daten für die Tabelle vorbereiten
+    # 1. Daten sammeln und MANUELL sortieren
     original_names = [str(p) for p in players]
+    score_data = []
+    
+    # Wir berechnen erst alle Punkte
+    for idx, name in enumerate(original_names):
+        total_score = int(np.sum(results.scores[idx]))
+        clean_name = players[idx].name
+        score_data.append((clean_name, total_score))
+        
+    # HIER IST DER FIX: Wir sortieren die Liste mathematisch absteigend nach Punkten!
+    score_data.sort(key=lambda x: x[1], reverse=True)
+    
+    # 2. Tabelle vorbereiten
     table_data = []
     
-    for rank, name in enumerate(results.ranked_names):
-        idx = original_names.index(name)
+    for rank, (clean_name, total_score) in enumerate(score_data):
         
-        # Durchschnittlichen Score pro Zug berechnen (aus allen Repetitionen)
-        avg_score = np.mean(results.normalised_scores[idx])
+        # Ränge formatieren (ohne Emojis wegen Windows-Font-Problemen)
+        rank_str = f"{rank + 1}."
         
-        # Deine Agenten markieren
-        is_my_agent = "PPO" in name or "DQN" in name or "Mein" in name
-        marker = "⭐ " if is_my_agent else ""
+        # Deine Agenten erkennen
+        is_my_agent = "Mein" in clean_name or "DQN" in clean_name or "PPO" in clean_name or "LSTM" in clean_name
+        marker = "► " if is_my_agent else ""
+        
+        # Tausendertrennzeichen hinzufügen (z.B. 12.345)
+        formatted_score = f"{total_score:,}".replace(',', '.')
         
         table_data.append([
-            rank + 1, 
-            f"{marker}{name}", 
-            f"{avg_score:.3f}"
+            rank_str, 
+            f"{marker}{clean_name}", 
+            formatted_score
         ])
         
-    # 2. Plot für die Tabelle aufbauen
-    # Höhe dynamisch anpassen basierend auf der Anzahl der Spieler
-    fig_height = max(4, len(table_data) * 0.3 + 1)
+    # 3. Plot für die Tabelle aufbauen
+    fig_height = max(5, len(table_data) * 0.35 + 1.5) 
     fig_table, ax_table = plt.subplots(figsize=(10, fig_height))
     
-    # Achsen verstecken, wir wollen nur die Tabelle sehen
     ax_table.axis('tight')
     ax_table.axis('off')
     
-    columns = ["Platz", "Strategie", "Ø Punkte pro Zug"]
+    # Spaltenüberschriften
+    columns = ["Platz", "Strategie", "Gesamtpunkte"]
     
     # Tabelle zeichnen
     table = ax_table.table(
@@ -506,26 +519,40 @@ def visualize_results(results, players):    #Verschiedene Diagramme zur Auswertu
         cellLoc='center'
     )
     
-    # 3. Styling der Tabelle (Schriftgröße, Farben)
+    # 4. Styling der Tabelle (Premium Optik)
     table.auto_set_font_size(False)
     table.set_fontsize(12)
-    table.scale(1.2, 1.8) # (Spaltenbreite, Zeilenhöhe)
+    table.scale(1.2, 2.0) 
     
-    # Farben anpassen (Header dunkel, deine KIs farblich hervorgehoben)
+    # Spaltenbreiten automatisch anpassen
+    table.auto_set_column_width([0, 1, 2])
+    
+    # Farben anpassen
     for (row, col), cell in table.get_celld().items():
+        cell.set_edgecolor('#dddddd') 
+        
         if row == 0:
-            # Header-Zeile
-            cell.set_text_props(weight='bold', color='white')
-            cell.set_facecolor('#4C72B0') # Schönes Seaborn-Blau
+            # Header-Zeile: Edles, dunkles Blau-Grau
+            cell.set_text_props(weight='bold', color='white', fontsize=13)
+            cell.set_facecolor('#2c3e50') 
         else:
-            # Zeilen deiner Agenten leicht einfärben, damit sie sofort auffallen
+            # Abwechselnde Zeilenfarben (Zebra-Muster)
+            if row % 2 == 0:
+                cell.set_facecolor('#f8f9fa')
+            else:
+                cell.set_facecolor('#ffffff')
+                
+            # Deine Agenten extrem edel hervorheben
             cell_text = table_data[row-1][1]
-            if "⭐" in cell_text:
-                cell.set_facecolor('#e6f2ff') # Helles Blau für deine KIs
-                if col == 1: # Den Namen fett machen
+            if "►" in cell_text:
+                cell.set_facecolor('#d4edda') 
+                cell.set_edgecolor('#c3e6cb') 
+                
+                if col == 1: 
+                    cell.set_text_props(weight='bold', color='#155724')
+                if col == 2: 
                     cell.set_text_props(weight='bold')
 
-    plt.title("🏆 Finales Turnier-Ranking", fontsize=16, pad=20, weight='bold')
+    plt.title("Finales Turnier-Ranking", fontsize=18, pad=20, weight='bold', color='#2c3e50')
     plt.tight_layout()
     plt.show()
-
